@@ -121,4 +121,42 @@ const TaskCalcOrderForWedding = (bakery, wedding) => {
     });
     return moneyWasted;
 };
+const TaskCalcFutureSales = (bakery) => {
+    let test = [];
+    const ingredientIncrease = bakery.salesOfLastWeek.map(elem => {
+        let cake = bakery.recipes.filter(elems => elem.name == elems.name);
+        let cakePrice = cake[0].ingredients.map(element => {
+            let ingredientPrice = bakery.wholesalePrices.filter(el => element.name == el.name);
+            return {
+                name: ingredientPrice[0].name,
+                amount: ingredientPrice[0].amount,
+                price: ingredientPrice[0].price
+            };
+        });
+        let increasedAmountAndPrices = cake[0].ingredients.map(e => {
+            let priceAmount = cakePrice.filter(ele => e.name == ele.name);
+            let incredAmount = Math.round(Number(e.amount.split(" ")[0]) * elem.amount);
+            let whamount = Number(priceAmount[0].amount.split(" ")[0]);
+            let amounts = (Math.ceil(incredAmount / whamount)) * priceAmount[0].price;
+            test.push({
+                name: e.name,
+                amount: incredAmount,
+                price: amounts
+            });
+        });
+    });
+    function groupBy(objectArray, property) {
+        return objectArray.reduce((acc, obj) => {
+            var _a;
+            const key = obj[property];
+            (_a = acc[key]) !== null && _a !== void 0 ? _a : (acc[key] = []);
+            acc[key].push(obj);
+            return acc;
+        }, {});
+    }
+    const groupedlist = groupBy(test, 'name');
+    // Sum items in groupedluist
+    console.log(groupedlist);
+};
+console.log(TaskCalcFutureSales(bakery));
 //# sourceMappingURL=challange.js.map

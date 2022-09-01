@@ -207,3 +207,48 @@ const TaskCalcOrderForWedding = (bakery: Bakery, wedding: Wedding): number => {
     })
     return moneyWasted
 }
+
+const TaskCalcFutureSales = (bakery:Bakery):any => {
+    let test:any[]=[] 
+    const ingredientIncrease : void[] = bakery.salesOfLastWeek.map(elem => {
+
+        let cake : Bakery['recipes'] = bakery.recipes.filter(elems => elem.name == elems.name);
+
+        let cakePrice : Bakery['wholesalePrices'] = cake[0].ingredients.map(element => {
+            let ingredientPrice:Bakery['wholesalePrices'] = bakery.wholesalePrices.filter(el => element.name == el.name)
+            return {
+                name: ingredientPrice[0].name,
+                amount: ingredientPrice[0].amount,
+                price: ingredientPrice[0].price
+            }
+        })
+        let increasedAmountAndPrices : void[] = cake[0].ingredients.map(e => {
+            let priceAmount : Bakery['wholesalePrices'] = cakePrice.filter(ele => e.name == ele.name);
+
+            let incredAmount = Math.round(Number(e.amount.split(" ")[0]) * elem.amount)
+            let whamount = Number(priceAmount[0].amount.split(" ")[0])
+            let amounts = (Math.ceil(incredAmount / whamount))*priceAmount[0].price;
+            test.push({
+                name:e.name,
+                amount:incredAmount,
+                price:amounts
+            })
+
+            
+            
+        })
+    })
+    function groupBy(objectArray:any, property:any) {
+        return objectArray.reduce((acc:any, obj:any) => {
+          const key = obj[property];
+          acc[key] ??= [];
+          acc[key].push(obj);
+          return acc;
+        }, {});
+      }
+
+      const groupedlist = groupBy(test, 'name')
+    // Sum items in groupedluist
+      console.log(groupedlist)
+}
+console.log(TaskCalcFutureSales(bakery))
