@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const bakery = require('../data/bakery.json');
 const wedding = require('../data/cakesForWedding.json');
 function unitchange(bakery) {
@@ -59,7 +60,7 @@ const TaskSumTotalProfit = (bakery) => {
     const calcIngredientUsage = bakery.salesOfLastWeek.map(element => {
         bakery.recipes.filter(elem => element.name == elem.name).map(elems => {
             let ingredientMul = elems.ingredients.map(e => {
-                e.amount = String(Number(e.amount.split(" ")[0]) * element.amount) + " " + e.amount.split(" ")[1];
+                e.amount = String(Number(e.amount.split(" ")[0]) * Number(element.amount)) + " " + e.amount.split(" ")[1];
                 ingredientMultiple.push({
                     name: e.name,
                     amount: e.amount
@@ -70,38 +71,54 @@ const TaskSumTotalProfit = (bakery) => {
     const calcIngredientUsagePrice = ingredientMultiple.map(element => {
         const ingPrice = bakery.wholesalePrices.map(elem => {
             if (element.name == elem.name) {
-                invesment += (Number(element.amount.split(" ")[0]) / Number(elem.amount.split(" ")[0])) * elem.price;
+                invesment += (Number(element.amount.split(" ")[0]) / Number(elem.amount.split(" ")[0])) * Number(elem.price);
             }
         });
     });
     return Number(TaskSumTotalSales(bakery)) - invesment;
 };
-const TaskCalcTotalBakeableAmount = (bakery) => {
-    let freedomeOfChoiceCalc = [];
-    let freedomeOfChoice = [];
-    const calc = bakery.inventory.map(element => {
-        bakery.recipes.map(elem => elem.ingredients.map(e => {
-            if (e.name == element.name) {
-                let amounts = Number(element.amount.split(" ")[0]) / Number(e.amount.split(" ")[0]);
-                freedomeOfChoiceCalc.push({
-                    name: elem.name,
-                    ingredients: {
-                        name: e.name,
-                        amount: amounts
-                    }
-                });
-            }
-        }));
+const TaskCalcTotalBakeCakeableAmount = (bakery) => {
+    const calc = bakery.recipes.map((element) => {
+        let ingredients = element.ingredients.map((elem) => {
+            let search = bakery.inventory.filter((elems) => elems.name == elem.name);
+            let amount = Math.floor(Number(search[0].amount.split(" ")[0]) / Number(elem.amount.split(" ")[0]));
+            return { name: elem.name, amount: amount };
+        });
+        return { name: element.name, ingredients };
     });
-    const groupBy = (arr, key) => arr.reduce((groups, item) => {
-        var _a;
-        (groups[_a = key(item)] || (groups[_a] = [])).push(item);
-        return groups;
-    }, {});
-    const results = groupBy(freedomeOfChoiceCalc, i => i.name);
-    for (let i of Object.keys(results)) {
-        console.log(results[i]);
-    }
+    let ordered = calc.map((elem) => {
+        elem.ingredients.sort((a, b) => Number(a.amount) - Number(b.amount));
+        return elem;
+    });
+    let maxBakingAmount = ordered.map((elem) => {
+        return {
+            name: String(elem.name),
+            amount: Number(elem.ingredients[0].amount),
+        };
+    });
+    return maxBakingAmount.sort((a, b) => a.name.localeCompare(b.name, "hu"));
 };
-TaskCalcTotalBakeableAmount(bakery);
+const TaskCalcTotalBakeableAmount = JSON.stringify(TaskCalcTotalBakeCakeableAmount(bakery));
+const TaskCalcOrderForWedding = (bakery, wedding) => {
+    let moneyWasted = 0;
+    const ingredientIncrease = wedding.order.map(elem => {
+        let cake = bakery.recipes.filter(elems => elem.name == elems.name);
+        let cakePrice = cake[0].ingredients.map(element => {
+            let ingredientPrice = bakery.wholesalePrices.filter(el => element.name == el.name);
+            return {
+                name: ingredientPrice[0].name,
+                amount: ingredientPrice[0].amount,
+                price: ingredientPrice[0].price
+            };
+        });
+        let increasedAmountAndPrices = cake[0].ingredients.map(e => {
+            let priceAmount = cakePrice.filter(ele => e.name == ele.name);
+            let incredAmount = Math.round(Number(e.amount.split(" ")[0]) * elem.amount);
+            let whamount = Number(priceAmount[0].amount.split(" ")[0]);
+            let amounts = Math.ceil(incredAmount / whamount);
+            moneyWasted += amounts * priceAmount[0].price;
+        });
+    });
+    return moneyWasted;
+};
 //# sourceMappingURL=challange.js.map

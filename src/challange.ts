@@ -1,3 +1,5 @@
+import { stringify } from "querystring";
+
 const bakery = require('../data/bakery.json')
 const wedding = require('../data/cakesForWedding.json')
 
@@ -29,16 +31,18 @@ interface Ingredients {
     name: string;
     amount: string;
 }
-interface IngredientsNum{
-    name:string;
-    amount:number;
-}
-interface IngredientsAmountNum  {
-    name : string;
-    ingredients : Ingredients[]|IngredientsNum
+
+interface IngredientsNum {
+    name: string;
+    amount: number;
 }
 
-interface wedding {
+interface IngredientsAmountNum {
+    name: string;
+    ingredients: Ingredients[] | IngredientsNum[]
+}
+
+interface Wedding {
     order: {
         name: string;
         amount: number;
@@ -95,7 +99,7 @@ const TaskSumTotalSales = (bakery: Bakery): Number => {
 
 const Intolerance = (bakery: Bakery): Alergies => {
 
-    function nameAndPrice(value: alergiesCake) {
+    function nameAndPrice(value: alergiesCake): alergiesCake {
         const { name, price } = value;
         return { name, price };
     }
@@ -115,9 +119,7 @@ const Intolerance = (bakery: Bakery): Alergies => {
 
     }
 
-
     return alergies
-
 }
 const TaskGroupByIntolerance = JSON.stringify(Intolerance(bakery))
 
@@ -125,10 +127,10 @@ const TaskSumTotalProfit = (bakery: Bakery): Number => {
     let invesment = 0
     let ingredientMultiple: Ingredients[] = []
 
-    const calcIngredientUsage : void[] = bakery.salesOfLastWeek.map(element => {
+    const calcIngredientUsage: void[] = bakery.salesOfLastWeek.map(element => {
         bakery.recipes.filter(elem => element.name == elem.name).map(elems => {
             let ingredientMul = elems.ingredients.map(e => {
-                e.amount = String(Number(e.amount.split(" ")[0]) * element.amount) + " " + e.amount.split(" ")[1]
+                e.amount = String(Number(e.amount.split(" ")[0]) * Number(element.amount)) + " " + e.amount.split(" ")[1]
                 ingredientMultiple.push({
                     name: e.name,
                     amount: e.amount
@@ -137,45 +139,71 @@ const TaskSumTotalProfit = (bakery: Bakery): Number => {
         })
 
     })
-    const calcIngredientUsagePrice :void[] = ingredientMultiple.map(element => {
+    const calcIngredientUsagePrice: void[] = ingredientMultiple.map(element => {
         const ingPrice = bakery.wholesalePrices.map(elem => {
             if (element.name == elem.name) {
-                invesment += (Number(element.amount.split(" ")[0]) / Number(elem.amount.split(" ")[0])) * elem.price
+                invesment += (Number(element.amount.split(" ")[0]) / Number(elem.amount.split(" ")[0])) * Number(elem.price)
             }
         })
     })
     return Number(TaskSumTotalSales(bakery)) - invesment
 }
 
-const TaskCalcTotalBakeableAmount = (bakery: Bakery) : any => {
-    let freedomeOfChoiceCalc: IngredientsAmountNum[] = []
-    let freedomeOfChoice: IngredientsAmountNum[] = []
-    const calc : void[] = bakery.inventory.map(element =>{
-            bakery.recipes.map(elem => elem.ingredients.map(e => {
-                if(e.name == element.name){
-                    let amounts= Number(element.amount.split(" ")[0]) / Number(e.amount.split(" ")[0])
-                    freedomeOfChoiceCalc.push({
-                        name:elem.name,
-                        ingredients:{
-                            name : e.name,
-                            amount: amounts
-                        }
-                    }
-                    )
-                }
-            }))
-        } )
-        const groupBy = <T, K extends keyof any>(arr: T[], key: (i: T) => K) =>
-        arr.reduce((groups, item) => {
-          (groups[key(item)] ||= []).push(item);
-          return groups;
-        }, {} as Record<K, T[]>);
+const TaskCalcTotalBakeCakeableAmount = (bakery: Bakery): IngredientsNum[] => {
+    const calc: IngredientsAmountNum[] = bakery.recipes.map((element) => {
+        let ingredients: IngredientsNum[] = element.ingredients.map((elem) => {
+            let search: Ingredients[] = bakery.inventory.filter((elems) => elems.name == elem.name);
+            let amount: number = Math.floor(
+                Number(search[0].amount.split(" ")[0]) / Number(elem.amount.split(" ")[0])
+            );
+            return { name: elem.name, amount: amount };
+        });
+        return { name: element.name, ingredients };
+    });
+    let ordered = calc.map((elem) => {
+        elem.ingredients.sort((a, b) => Number(a.amount) - Number(b.amount));
+        return elem;
+    });
 
-        const results = groupBy(freedomeOfChoiceCalc, i => i.name);
+    let maxBakingAmount = ordered.map((elem) => {
+        return {
+            name: String(elem.name),
+            amount: Number(elem.ingredients[0].amount),
+        };
+    });
 
-        for(let i of Object.keys(results)){
-            console.log(results[i])
-        }
-} 
 
-TaskCalcTotalBakeableAmount(bakery)
+
+    return maxBakingAmount.sort((a, b) => a.name.localeCompare(b.name, "hu"));
+}
+
+const TaskCalcTotalBakeableAmount = JSON.stringify(TaskCalcTotalBakeCakeableAmount(bakery))
+
+
+const TaskCalcOrderForWedding = (bakery: Bakery, wedding: Wedding): number => {
+    let moneyWasted:number = 0
+
+    const ingredientIncrease : void[] = wedding.order.map(elem => {
+
+        let cake : Bakery['recipes'] = bakery.recipes.filter(elems => elem.name == elems.name);
+
+        let cakePrice : Bakery['wholesalePrices'] = cake[0].ingredients.map(element => {
+            let ingredientPrice:Bakery['wholesalePrices'] = bakery.wholesalePrices.filter(el => element.name == el.name)
+            return {
+                name: ingredientPrice[0].name,
+                amount: ingredientPrice[0].amount,
+                price: ingredientPrice[0].price
+            }
+        })
+        let increasedAmountAndPrices : void[] = cake[0].ingredients.map(e => {
+            let priceAmount : Bakery['wholesalePrices'] = cakePrice.filter(ele => e.name == ele.name);
+
+            let incredAmount = Math.round(Number(e.amount.split(" ")[0]) * elem.amount)
+            let whamount = Number(priceAmount[0].amount.split(" ")[0])
+            let amounts = Math.ceil(incredAmount / whamount);
+            moneyWasted += amounts * priceAmount[0].price;
+
+        })
+    })
+    return moneyWasted
+}
