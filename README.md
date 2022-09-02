@@ -1,0 +1,14 @@
+# Coding-Sans--Coding-Challenge-2022-Application--Typescript
+ 
+ <h2>Coding Challenge Test</h2>
+Create your solutions using any language supported by Replit, but Typescript, Javascript, and Python are preferred. (Tip: Work in Replit because you have to submit it later.)
+
+Here is the JSON file with data: bakery.json
+
+All tasks require the input to be JSON parsable in JS. (JSON.stringify in JS, json.dumps in Python, check https://www.json.org/json-en.html for other languages)
+
+There are 6 tasks in this test. You need to complete at least the first 5 mandatory ones to be able to submit your solutions. Your submitted code will be evaluated as well, so make sure the code is easy to read and not overcomplicated.
+
+At the last screen, also upload your solutions to Replit and make sure to set your repository's settings to public, and that your code runs, so we can review it!
+
+<h2>Stevie's Sweetshop and Cakery</h2><p>Stevie is your long-time friend. Due to a mid-life crisis, he decided to abandon his lucrative career as a cardiac surgeon and follow his dream. After going bankrupt a few times in various fields - including a Kickstarter campaign selling instant water and a livestock farm - , he finally found his calling and opened a Sweetshop where he bakes cakes and cookies. He's always been a really good baker with a knack for sweets, so you're surprised why a bakery wasn't his first choice, but business and rational thinking aren't his strengths.</p><div class="styles_imageContainer__Ix67n"><span style="box-sizing:border-box;display:inline-block;overflow:hidden;width:initial;height:initial;background:none;opacity:1;border:0;margin:0;padding:0;position:relative;max-width:100%"><span style="box-sizing:border-box;display:block;width:initial;height:initial;background:none;opacity:1;border:0;margin:0;padding:0;max-width:100%"><img style="display:block;max-width:100%;width:initial;height:initial;background:none;opacity:1;border:0;margin:0;padding:0" alt="" aria-hidden="true" src="data:image/svg+xml,%3csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20version=%271.1%27%20width=%27280%27%20height=%27280%27/%3e"></span></span></div><p>After a few weeks of running his shop, he's calling you in the middle of the night, desperate, offering a lifetime supply of sweets in exchange for your help. You are a well-known glutton, so you jump at this wonderful opportunity. To ensure the unending flow of cakes and pastries into your belly, you gather all your knowledge to help him stay in business.</p><p>Stevie sends every available data point he has, along with the problems he's facing. In the data, you find the secret recipes of his great-grandmother with detailed ingredients, his inventory of supplies, wholesale prices for the ingredients, and his last week of retail sales amount.</p><p>Here is the JSON file with data:<!-- --> <a target="_blank" href="/sources/bakery/bakery.json">bakery.json</a></p>
