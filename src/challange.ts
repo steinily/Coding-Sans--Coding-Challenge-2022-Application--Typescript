@@ -129,7 +129,7 @@ const TaskSumTotalProfit = (bakery: Bakery): Number => {
 
     const calcIngredientUsage: void[] = bakery.salesOfLastWeek.map(element => {
         bakery.recipes.filter(elem => element.name == elem.name).map(elems => {
-            let ingredientMul = elems.ingredients.map(e => {
+            let ingredientMul : void[] = elems.ingredients.map(e => {
                 e.amount = String(Number(e.amount.split(" ")[0]) * Number(element.amount)) + " " + e.amount.split(" ")[1]
                 ingredientMultiple.push({
                     name: e.name,
@@ -209,46 +209,69 @@ const TaskCalcOrderForWedding = (bakery: Bakery, wedding: Wedding): number => {
 }
 
 const TaskCalcFutureSales = (bakery:Bakery):any => {
-    let test:any[]=[] 
-    const ingredientIncrease : void[] = bakery.salesOfLastWeek.map(elem => {
-
-        let cake : Bakery['recipes'] = bakery.recipes.filter(elems => elem.name == elems.name);
-
-        let cakePrice : Bakery['wholesalePrices'] = cake[0].ingredients.map(element => {
-            let ingredientPrice:Bakery['wholesalePrices'] = bakery.wholesalePrices.filter(el => element.name == el.name)
-            return {
-                name: ingredientPrice[0].name,
-                amount: ingredientPrice[0].amount,
-                price: ingredientPrice[0].price
-            }
-        })
-        let increasedAmountAndPrices : void[] = cake[0].ingredients.map(e => {
-            let priceAmount : Bakery['wholesalePrices'] = cakePrice.filter(ele => e.name == ele.name);
-
-            let incredAmount = Math.round(Number(e.amount.split(" ")[0]) * elem.amount)
-            let whamount = Number(priceAmount[0].amount.split(" ")[0])
-            let amounts = (Math.ceil(incredAmount / whamount))*priceAmount[0].price;
-            test.push({
-                name:e.name,
-                amount:incredAmount,
-                price:amounts
-            })
-
-            
-            
-        })
+    //Sum ingredients 
+    let increaseIng:any[] = []
+    const cakes = bakery.salesOfLastWeek.filter(element =>
+        {const calc=  bakery.recipes.map(elem => {
+        if (element.name == elem.name) {
+            elem.ingredients.map(e => {
+                let amountNum = Number(e.amount.split(" ")[0]);
+                let amountUnit = e.amount.split(" ")[1];
+                e.amount = String(amountNum * element.amount * 2*1.1) + " " + amountUnit;
+                return  e.amount;
+            });}
+        return elem
     })
-    function groupBy(objectArray:any, property:any) {
-        return objectArray.reduce((acc:any, obj:any) => {
-          const key = obj[property];
-          acc[key] ??= [];
-          acc[key].push(obj);
-          return acc;
-        }, {});
-      }
+    increaseIng = calc
+    });
+    const increaseIngFilter = bakery.salesOfLastWeek.map(e =>increaseIng.find(el => e.name == el.name))
 
-      const groupedlist = groupBy(test, 'name')
-    // Sum items in groupedluist
-      console.log(groupedlist)
+    const ingredientsOnlyAndSum = increaseIngFilter.map(e => e.ingredients).flatMap(e =>e).reduce((curr,next)=>{
+        const {name , amount} = next
+        let amountNum = Number(amount.split(" ")[0])
+        let amountUnit = amount.split(" ")[1]
+        if(curr[name]==null){
+            curr[name] ??= []
+            curr[name].push({
+                name:name,
+                amount: String(amountNum)+" "+amountUnit
+            })
+        }else {
+            let old = Number(curr[name][0].amount.split(" ")[0])
+            curr[name][0].amount = String(Number(old)+Number(amountNum))+" "+amountUnit
+        }
+        return curr
+
+    },{})
+
+    let listForClerk :any[] =[]
+    const netxTwoWeekIngredinent = () => {
+        for(let item of Object.keys(ingredientsOnlyAndSum)){
+            let whsale = ingredientsOnlyAndSum[item].map(e =>bakery.wholesalePrices.find(el=>e.name == el.name))
+            let inventory =ingredientsOnlyAndSum[item].map(e =>bakery.inventory.find(el=>e.name == el.name))
+            let invAmountNum = Number(inventory[0].amount.split(" ")[0])
+            let whname =whsale[0].name
+            let whamount =whsale[0].amount
+            let whpirce = whsale[0].price
+            let whamountNum = Number(whamount.split(" ")[0])
+            let oneItem = whpirce/whamountNum
+            let whamountUnit = whamount.split(" ")[1]
+            let ingredientsToBuy = Number(ingredientsOnlyAndSum[item][0].amount.split(" ")[0]) - Number(invAmountNum)
+            let calc = Math.ceil(Math.ceil(ingredientsToBuy/whamountNum)*whamountNum)
+            if(calc*oneItem > 0){
+            listForClerk.push( {
+                name: whname,
+                amount:String(calc)+" "+whamountUnit,
+                totalPrice: calc*oneItem
+            })}
+        }
+    }
+    netxTwoWeekIngredinent()
+    let listForClerkSorted = listForClerk.sort((a,b) => b.totalPrice-a.totalPrice)
+    console.log(listForClerk)
 }
+
+// # Todo 
+// Last function prettyfy
+// all answer save to resp file
 console.log(TaskCalcFutureSales(bakery))
